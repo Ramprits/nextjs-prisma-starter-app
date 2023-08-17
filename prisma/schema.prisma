@@ -9,3 +9,53 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Category {
+  categoryId  String    @id @default(cuid()) @map("category_id")
+  title       String
+  description String
+  color       String
+  img         String
+  slug        String    @unique
+  products    Product[]
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("categories")
+}
+
+model Product {
+  productId   String    @id @default(cuid()) @map("product_id")
+  title       String
+  description String
+  img         String?
+  slug        String    @unique
+  price       Decimal   @default(0.0)
+  isFeatured  Boolean   @default(false) @map("is_featured")
+  options     Json[]    @default([])
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  category    Category? @relation(fields: [categoryId], references: [slug])
+  categoryId  String?   @map("category_id")
+
+  @@map("products")
+}
+
+model Order {
+  orderId   String   @id @default(cuid()) @map("order_id")
+  price     Decimal
+  products  Json[]
+  status    Status   @default(open)
+  intentId  String?  @unique @map("intent_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("orders")
+}
+
+enum Status {
+  open
+  pending
+  wip
+  delivered
+}
